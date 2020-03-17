@@ -4,6 +4,7 @@ import {ShoppingEditComponent} from './shopping-edit/shopping-edit.component';
 import {RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {SharedModule} from '../shared/shared.module';
 
 
 @NgModule({
@@ -12,9 +13,9 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     ShoppingEditComponent,
   ],
   imports: [
-    CommonModule,
     FormsModule,
-    RouterModule.forChild([{ path: 'shopping-list', component: ShoppingListComponent}])
+    RouterModule.forChild([{ path: 'shopping-list', component: ShoppingListComponent}]),
+    SharedModule
   ],
   exports: [
     ShoppingListComponent,
