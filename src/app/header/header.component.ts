@@ -11,7 +11,7 @@ import {AuthService} from '../auth/auth.service';
 export class HeaderComponent implements OnInit, OnDestroy{
 
   userSub: Subscription;
-  private isAuthenticated = false;
+  public isAuthenticated = false;
 
   constructor(private dataStorageService: DataStorageService,
               private authService: AuthService) {}
