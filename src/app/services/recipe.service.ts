@@ -2,6 +2,7 @@ import {Recipe} from '../recipes/recipe.model';
 import {Ingredient} from '../shared/ingredient.model';
 import {Subject} from 'rxjs';
 import { Injectable } from "@angular/core";
+import {Store} from '@ngrx/store';
 
 @Injectable()
 export class RecipeService {
@@ -22,6 +23,7 @@ export class RecipeService {
   //       new Ingredient('Meat', 1)
   //     ])
   // ];
+
 
   private recipes: Recipe[] = [];
 
