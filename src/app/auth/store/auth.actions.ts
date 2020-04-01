@@ -3,6 +3,7 @@ import {User} from '../user.model';
 
 export const LOGIN = '[Auth] Login';
 export const LOGOUT = '[Auth] Logout';
+export const LOGIN_START = '[Auth] Login Start';
 
 
 export class Login implements Action{
