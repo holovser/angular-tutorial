@@ -5,6 +5,9 @@ import {BehaviorSubject, Subject, throwError} from 'rxjs';
 import {User} from './user.model';
 import {Data, Router} from '@angular/router';
 import { environment} from '../../environments/environment';
+import {Store} from '@ngrx/store';
+import * as fromApp from '../store/app.reducer';
+import * as AuthActions from './store/auth.actions';
 
 export interface AuthResponseData {
   kind: string,
@@ -20,17 +23,17 @@ export interface AuthResponseData {
 @Injectable({providedIn: 'root'})
 export class AuthService implements OnInit{
 
-  userSubject = new BehaviorSubject<User>(null);
+  // userSubject = new BehaviorSubject<User>(null);
   token: string = null;
   tokeExpirationTimer: any;
 
   constructor(private http: HttpClient,
-              private router: Router) {
+              private router: Router,
+              private store: Store<fromApp.AppState>) {
   }
 
   ngOnInit(): void {
   }
-
 
 
   signUp(email: string, password: string) {
@@ -80,7 +83,8 @@ export class AuthService implements OnInit{
   }
 
   logout() {
-    this.userSubject.next(null);
+    // this.userSubject.next(null);
+    this.store.dispatch(new AuthActions.Logout());
     localStorage.removeItem('userData');
     this.router.navigate(['/auth']);
 
@@ -119,7 +123,8 @@ export class AuthService implements OnInit{
     const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
 
     const user = new User(email, userId, token, expirationDate);
-    this.userSubject.next(user);
+    // this.userSubject.next(user);
+    this.store.dispatch(new AuthActions.Login(user));
     this.autoLogout(expiresIn * 1000);
     localStorage.setItem('userData', JSON.stringify(user));
   }
@@ -139,7 +144,8 @@ export class AuthService implements OnInit{
     );
 
     if ( loadedUser.token ) {
-      this.userSubject.next(loadedUser);
+      // this.userSubject.next(loadedUser);
+      this.store.dispatch(new AuthActions.Login(loadedUser));
 
       const expirationDuration = new Date(userData._tokenExpirationDate).getTime() - new Date().getTime();
       this.autoLogout(expirationDuration);
