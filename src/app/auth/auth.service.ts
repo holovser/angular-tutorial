@@ -35,59 +35,10 @@ export class AuthService implements OnInit{
   ngOnInit(): void {
   }
 
-
-  signUp(email: string, password: string) {
-    return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signUp?' +
-      'key=' + environment.firebaseAPIKey,
-      {
-        email: email,
-        password: password,
-        returnSecureToken: true
-      }
-      ).pipe(
-        catchError(this.handleError),
-        tap(
-          responseData => {
-            this.handleAuthentication(
-              responseData.email,
-              responseData.localId,
-              responseData.idToken,
-              +responseData.expiresIn
-            );
-          }
-        )
-      );
-
-  }
-
-  login(email: string, password: string ) {
-    return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?' +
-      'key=' + environment.firebaseAPIKey,
-      {
-        email: email,
-        password: password,
-        returnSecureToken: true})
-      .pipe(
-        catchError(this.handleError),
-        tap(
-          responseData => {
-            this.handleAuthentication(
-              responseData.email,
-              responseData.localId,
-              responseData.idToken,
-              +responseData.expiresIn
-            );
-          }
-        )
-      );
-  }
-
   logout() {
     // this.userSubject.next(null);
     this.store.dispatch(new AuthActions.Logout());
     localStorage.removeItem('userData');
-    this.router.navigate(['/auth']);
-
     if ( this.tokeExpirationTimer ) {
       clearTimeout(this.tokeExpirationTimer);
     }
@@ -124,7 +75,7 @@ export class AuthService implements OnInit{
 
     const user = new User(email, userId, token, expirationDate);
     // this.userSubject.next(user);
-    this.store.dispatch(new AuthActions.Login(user));
+    this.store.dispatch(new AuthActions.AuthenticateSuccess(user));
     this.autoLogout(expiresIn * 1000);
     localStorage.setItem('userData', JSON.stringify(user));
   }
@@ -145,7 +96,7 @@ export class AuthService implements OnInit{
 
     if ( loadedUser.token ) {
       // this.userSubject.next(loadedUser);
-      this.store.dispatch(new AuthActions.Login(loadedUser));
+      this.store.dispatch(new AuthActions.AuthenticateSuccess(loadedUser));
 
       const expirationDuration = new Date(userData._tokenExpirationDate).getTime() - new Date().getTime();
       this.autoLogout(expirationDuration);
