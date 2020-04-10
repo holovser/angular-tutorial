@@ -3,7 +3,7 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import * as AuthActions from './auth.actions';
 import {catchError, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
-import {AuthResponseData} from '../auth.service';
+import {AuthResponseData, AuthService} from '../auth.service';
 import {HttpClient} from '@angular/common/http';
 import {of} from 'rxjs';
 import {User} from '../user.model';
@@ -67,6 +67,9 @@ export class AuthEffects {
           returnSecureToken: true
         }
       ).pipe(
+        tap( resData => {
+          this.authService.setLogoutTimer(+resData.expiresIn*1000);
+        }),
         map( resData => {
           return handleAuthentication(resData)
         }),
@@ -88,6 +91,9 @@ export class AuthEffects {
           password: authData.payload.password,
           returnSecureToken: true
         }).pipe(
+        tap( resData => {
+          this.authService.setLogoutTimer(+resData.expiresIn*1000);
+        }),
         map(resData => {
           console.log(resData);
           return handleAuthentication(resData)
@@ -101,7 +107,7 @@ export class AuthEffects {
 
   @Effect({dispatch: false})
   authRedirect = this.actions$.pipe(
-    ofType(AuthActions.AUTHENTICATE_SUCCESS, AuthActions.LOGOUT),
+    ofType(AuthActions.AUTHENTICATE_SUCCESS),
     tap(() => {
       this.router.navigate(['/']);
     })
@@ -111,7 +117,9 @@ export class AuthEffects {
   authLogout = this.actions$.pipe(
     ofType(AuthActions.LOGOUT),
     tap( () => {
+      this.authService.clearLogoutTimer();
       localStorage.removeItem('userData');
+      this.router.navigate(['auth']);
     })
   );
 
@@ -136,6 +144,8 @@ export class AuthEffects {
 
       if ( loadedUser.token ) {
         console.log('Login successful');
+        const expirationDuration = new Date(userData._tokenExpirationDate).getTime() - new Date().getTime();
+        this.authService.setLogoutTimer(expirationDuration);
         return new AuthActions.AuthenticateSuccess(loadedUser);
         // this.store.dispatch(new AuthActions.AuthenticateSuccess(loadedUser));
 
@@ -149,7 +159,8 @@ export class AuthEffects {
 
   constructor(private actions$: Actions,
               private http: HttpClient,
-              private router: Router) {
+              private router: Router,
+              private authService: AuthService) {
   }
 }
 
